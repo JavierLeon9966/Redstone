@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace JavierLeon9966\Redstone\block;
 
 use pocketmine\block\Block;
-use pocketmine\block\BlockIds;
 use pocketmine\block\Flowable;
 use pocketmine\block\Slab;
 use pocketmine\block\Stair;
@@ -17,9 +16,17 @@ class RedstoneWireBlock extends Flowable implements RedstoneInterface
 {
     use RedstoneTrait;
 
+    protected $id = self::REDSTONE_WIRE;
+    protected $itemId = Item::REDSTONE;
+
     public function __construct(int $meta = 0)
     {
-        parent::__construct(BlockIds::REDSTONE_WIRE, $meta, "Redstone Wire");
+        $this->meta = $meta;
+    }
+
+    public function getName(): string
+    {
+        return 'Redstone Wire';
     }
 
     public function getStrongPower(int $face): int
@@ -30,10 +37,12 @@ class RedstoneWireBlock extends Flowable implements RedstoneInterface
     public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null): bool
     {
         $under = $this->down();
-        if (($under instanceof Stair && $under->getDamage() < 4) || ($under instanceof Slab && $under->getDamage() < 8) || !$under->isSolid() || $under->isTransparent()) return false;
+        if (($under instanceof Stair && $under->getDamage() < 4) || ($under instanceof Slab && $under->getDamage() < 8) || (!$under->isSolid() && $under->isTransparent())) return false;
 
         $this->updateUnpoweredRedstone($this);
-        return parent::place($item, $blockReplace, $blockClicked, $face, $clickVector, $player);
+        $this->getLevelNonNull()->setBlock($blockReplace, $this, true);
+
+        return true;
     }
 
     public function onBreak(Item $item, Player $player = null): bool
@@ -48,20 +57,18 @@ class RedstoneWireBlock extends Flowable implements RedstoneInterface
 
         $under = $this->down();
 
-        if (($under instanceof Stair && $under->getDamage() >= 4) || ($under instanceof Slab && $under->getDamage() >= 8) || $under->isSolid() && !$under->isTransparent()) return;
-        $this->level->useBreakOn($this);
+        if (($under instanceof Stair && $under->getDamage() >= 4) || ($under instanceof Slab && $under->getDamage() >= 8) || ($under->isSolid() && !$under->isTransparent())) return;
+        $this->getLevelNonNull()->useBreakOn($this);
     }
 
     public function getWeakPower(int $face): int
     {
-        if ($face === Vector3::SIDE_UP) return $this->getDamage();
-        if ($this->getSide(Vector3::getOppositeSide($face)) instanceof UnpoweredRedstoneBlock) return $this->getDamage();
+        if ($face === Vector3::SIDE_UP || $this->getSide(Vector3::getOppositeSide($face)) instanceof UnpoweredRedstoneBlock) return $this->getDamage();
 
-        $directions = [Vector3::SIDE_NORTH, Vector3::SIDE_EAST, Vector3::SIDE_SOUTH, Vector3::SIDE_WEST];
-        $directions = array_diff($directions, [$face, Vector3::getOppositeSide($face)]);
-        foreach ($directions as $face) {
-            $side = $this->getSide($face);
-            if (($side instanceof RedstoneInterface && $side->isPowerSource()) || $side instanceof RedstoneWireBlock || $side instanceof UnpoweredRedstoneBlock) return 0;
+        foreach ($this->getHorizontalSides() as $side => $block) {
+            if($side === $face || Vector3::getOppositeSide($face) === $side) continue;
+
+            if (($block instanceof RedstoneInterface && $block->isPowerSource()) || $block instanceof RedstoneWireBlock || $block instanceof UnpoweredRedstoneBlock) return 0;
         }
         return $this->getDamage();
     }
@@ -80,7 +87,7 @@ class RedstoneWireBlock extends Flowable implements RedstoneInterface
                 }
             } else if ($block->isTransparent()) {
                 if ($face === Vector3::SIDE_UP) {
-                    foreach($this->getHorizontalSides() as $sideBlock){
+                    foreach($block->getHorizontalSides() as $sideBlock){
                         if ($sideBlock instanceof RedstoneWireBlock) $power = max($power, $sideBlock->getDamage() - 1);
                     }
                 } else if ($face !== Vector3::SIDE_DOWN) {
@@ -91,8 +98,8 @@ class RedstoneWireBlock extends Flowable implements RedstoneInterface
         }
 
         if ($this->getDamage() !== $power) {
-            $this->setDamage($power);
-            $this->level->setBlock($this, $this, true);
+            $this->meta = $power;
+            $this->getLevelNonNull()->setBlock($this, $this, false, false);
             $this->updateUnpoweredRedstone($this);
         }
     }

@@ -21,15 +21,15 @@ trait RedstoneTrait
     public function updateUnpoweredRedstone(Block $block): void
     {
         $cash = [];
-        foreach ($block->getAllSides() as $sideBlock) {
-            if (array_search($sideBlock, $cash, true) !== false) continue;
+        foreach ($block->getAllSides() as $side => $sideBlock) {
+            if (in_array($sideBlock, $cash, true)) continue;
 
-            $cash[] = $block;
+            $cash[] = $sideBlock;
 
-            foreach($block->getAllSides() as $side1 => $sideBlock1){
-                if(Vector3::getOppositeSide($side1) === $side1 || array_search($sideBlock1, $cash, true) !== false) continue;
+            foreach($sideBlock->getAllSides() as $side2 => $sideBlock2){
+                if(Vector3::getOppositeSide($side) === $side2 || in_array($sideBlock2, $cash, true)) continue;
 
-                $cash[] = $sideBlock1;
+                $cash[] = $sideBlock2;
             }
         }
         foreach($cash as $block) if($block instanceof RedstoneInterface) $block->onRedstoneUpdate();
@@ -45,7 +45,7 @@ trait RedstoneTrait
         foreach ($block->getAllSides() as $side => $sideBlock) {
             if ($face !== null && $face === $side) continue;
 
-            if ($this->getRedstonePower($block->getSide($side), $side) > 0) return true;
+            if ($this->getRedstonePower($sideBlock, $side) > 0) return true;
         }
         return false;
     }
@@ -59,7 +59,7 @@ trait RedstoneTrait
     {
         $power = 0;
         foreach ($block->getAllSides() as $side => $sideBlock) {
-            $power = max($power, $this->getSideStrongPowered($block->getSide($side), $side));
+            $power = max($power, $this->getSideStrongPowered($sideBlock, $side));
 
             if ($power >= 15) return $power;
         }
