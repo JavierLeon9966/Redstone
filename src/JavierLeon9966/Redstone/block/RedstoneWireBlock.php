@@ -37,7 +37,7 @@ class RedstoneWireBlock extends Flowable implements RedstoneInterface
     public function place(Item $item, Block $blockReplace, Block $blockClicked, int $face, Vector3 $clickVector, Player $player = null): bool
     {
         $under = $this->down();
-        if (($under instanceof Stair && $under->getDamage() < 4) || ($under instanceof Slab && $under->getDamage() < 8) || (!$under->isSolid() && $under->isTransparent())) return false;
+        if (($under instanceof Stair && $under->getDamage() < 4) || ($under instanceof Slab && $under->getDamage() < 8) || !$under->isSolid() || $under->isTransparent()) return false;
 
         $this->updateUnpoweredRedstone($this);
         $this->getLevelNonNull()->setBlock($blockReplace, $this, true);
