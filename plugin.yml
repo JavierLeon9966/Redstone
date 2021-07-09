@@ -1,0 +1,6 @@
+name: Redstone
+version: 1.0.0
+main: JavierLeon9966\Redstone\Redstone
+api: 3.0.0
+description: A plugin that adds redstone and all it’s mechanics
+authors: ["Javier Leon9966", "xSuper"]
