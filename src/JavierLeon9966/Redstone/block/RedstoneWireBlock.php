@@ -105,7 +105,7 @@ class RedstoneWireBlock extends Flowable
         if ($power > $maxStrength - 1) $maxStrength = $power;
         else if ($power < $maxStrength && $strength <= $maxStrength) $maxStrength = max($power, $strength - 1);
 
-        if ($this->meta = $maxStrength) {
+        if ($this->meta !== $maxStrength) {
             $this->meta = $maxStrength;
             $this->getLevelNonNull()->setBlock($this, $this, false, true);
 
