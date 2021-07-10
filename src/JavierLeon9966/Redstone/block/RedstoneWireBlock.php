@@ -42,7 +42,7 @@ class RedstoneWireBlock extends Flowable
         $this->updateSurroundingRedstone(true);
 
         foreach ([Vector3::SIDE_DOWN, Vector3::SIDE_UP] as $blockFace) {
-            RedstoneComponent::updateAroundRedstone($this->getSide($blockFace), Vector3::getOppositeSide($blockFace));
+            RedstoneComponent::updateAroundRedstone($this->getSide($blockFace), [Vector3::getOppositeSide($blockFace)]);
         }
 
         foreach ([Vector3::SIDE_DOWN, Vector3::SIDE_UP] as $blockFace) {
@@ -63,7 +63,7 @@ class RedstoneWireBlock extends Flowable
             RedstoneComponent::updateAroundRedstone($this, [$face]);
 
             foreach ($this->getAllSides() as $side => $sideBlock) {
-                RedstoneComponent::updateAroundRedstone($sideBlock, Vector3::getOppositeSide($side));
+                RedstoneComponent::updateAroundRedstone($sideBlock, [Vector3::getOppositeSide($side)]);
             }
         }
     }
@@ -112,7 +112,7 @@ class RedstoneWireBlock extends Flowable
             RedstoneComponent::updateAllAroundRedstone($this);
         } else if ($force) {
             foreach ($this->getAllSides() as $face => $block) {
-                RedstoneComponent::updateAroundRedstone($block, Vector3::getOppositeSide($face));
+                RedstoneComponent::updateAroundRedstone($block, [Vector3::getOppositeSide($face)]);
             }
         }
     }

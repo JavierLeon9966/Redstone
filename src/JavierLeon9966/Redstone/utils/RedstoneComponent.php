@@ -13,7 +13,7 @@ final class RedstoneComponent
 
     }
 
-    public static function updateAroundRedstone(Block $block, array $ignoredFaces): void
+    public static function updateAroundRedstone(Block $block, array $ignoredFaces = []): void
     {
         foreach ($block->getAllSides() as $face => $sideBlock) {
             if(in_array($face, $ignoredFaces, true)) continue;
@@ -29,7 +29,7 @@ final class RedstoneComponent
         foreach ($block->getAllSides() as $face => $sideBlock) {
             if (in_array($face, $ignoredFaces, true)) continue;
 
-            self::updateAroundRedstone($sideBlock, Vector3::getOppositeSide($face));
+            self::updateAroundRedstone($sideBlock, [Vector3::getOppositeSide($face)]);
         }
     }
 }

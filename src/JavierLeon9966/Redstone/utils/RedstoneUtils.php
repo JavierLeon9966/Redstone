@@ -12,12 +12,12 @@ final class RedstoneUtils
 
     }
 
-    public function getStrongPower(Block $block, int $side): int
+    public static function getStrongPower(Block $block, int $side): int
     {
         return method_exists($block, 'getStrongPower') ? $block->getStrongPower($side) : 0;
     }
 
-    public function getWeakPower(Block $block, int $side): int
+    public static function getWeakPower(Block $block, int $side): int
     {
         return method_exists($block, 'getWeakPower') ? $block->getWeakPower($side) : 0;
     }
